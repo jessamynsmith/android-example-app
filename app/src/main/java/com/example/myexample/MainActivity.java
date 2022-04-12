@@ -20,6 +20,7 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -41,18 +42,17 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONArray response) {
                         Log.d("response", response.toString());
-                        ArrayList<String> newSuggestions = new ArrayList<>();
+                        adapter.clear();
                         try {
                             for (int i = 0; i < response.length(); i++) {
                                 JSONObject item = response.getJSONObject(i);
-                                newSuggestions.add((String)item.get("name"));
+                                adapter.add((String)item.get("name"));
                             }
                         } catch (org.json.JSONException e) {
                             Log.e("JSON exception", e.toString());
                         }
-                        suggestions = newSuggestions;
-                        Log.d("new suggestions", suggestions.toString());
                         adapter.notifyDataSetChanged();
+                        adapter.getFilter().filter(searchParam);
                     }
                 }, new Response.ErrorListener() {
 
