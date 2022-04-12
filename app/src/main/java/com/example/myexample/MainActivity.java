@@ -2,54 +2,28 @@ package com.example.myexample;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class MainActivity extends AppCompatActivity {
-    List<String> suggestions = new ArrayList<>();
-    ArrayAdapter<String> adapter;
-
-    private void retrieveData(String s){
-        //Do your stuff here with the String s and store the list of your results in the list suggestions
-        ArrayList<String> yourList = new ArrayList();
-        suggestions = yourList;
-        adapter.notifyDataSetChanged();
-    }
+    String[] fruits = {"Apple", "Banana", "Cherry", "Date",
+            "Grape", "Kiwi", "Mango", "Melon", "Pear"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        AutoCompleteTextView autocomplete = (AutoCompleteTextView)findViewById(R.id.autoComplete);
-        adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_dropdown_item_1line, suggestions);
-        autocomplete.setAdapter(adapter);
-        Activity activity = this;
 
-        autocomplete.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        //Creating the instance of ArrayAdapter containing list of fruit names
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>
+                (this, android.R.layout.select_dialog_item, fruits);
+        //Getting the instance of AutoCompleteTextView
+        AutoCompleteTextView actv = (AutoCompleteTextView) findViewById(R.id.autoComplete);
+        actv.setThreshold(1);//will start working from first character
+        actv.setAdapter(adapter);//setting the adapter data into the AutoCompleteTextView
+        actv.setTextColor(Color.RED);
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                //retrieveData(s);
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                Log.d("Main", "text changed" + editable.toString());
-                retrieveData(editable.toString());
-            }
-        });
     }
 }
