@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.android.volley.Request;
@@ -30,8 +31,9 @@ public class MainActivity extends AppCompatActivity {
     ArrayAdapter<String> adapter;
 
     List<String> suggestions = new ArrayList<>();
+    JSONArray detailData;
 
-    private void retrieveData(String searchParam){
+    private void retrieveAutocompleteData(String searchParam){
         RequestQueue mRequestQueue = Volley.newRequestQueue(getApplicationContext());
 
         String authorUrl = "https://underquoted.herokuapp.com/api/v2/author_summary/";
@@ -50,6 +52,20 @@ public class MainActivity extends AppCompatActivity {
                     }
                     adapter.notifyDataSetChanged();
                     adapter.getFilter().filter(searchParam);
+                }, error -> Log.e("JsonArrayRequest error", error.toString()));
+
+        mRequestQueue.add(mRequest);
+    }
+
+    private void retrieveDetailData(String searchParam){
+        RequestQueue mRequestQueue = Volley.newRequestQueue(getApplicationContext());
+
+        String authorUrl = "https://underquoted.herokuapp.com/api/v2/authors/";
+        String url = authorUrl + "?name=" + searchParam;
+        JsonArrayRequest mRequest = new JsonArrayRequest
+                (Request.Method.GET, url, null, response -> {
+                    Log.d("response", response.toString());
+                    detailData = response;
                 }, error -> Log.e("JsonArrayRequest error", error.toString()));
 
         mRequestQueue.add(mRequest);
@@ -79,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 Log.d("afterTextChanged", editable.toString());
-                retrieveData(editable.toString());
+                retrieveAutocompleteData(editable.toString());
             }
         });
     }
@@ -91,6 +107,21 @@ public class MainActivity extends AppCompatActivity {
 
         MenuItem searchMenu = menu.findItem(R.id.search);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchMenu);
+        searchView.setSubmitButtonEnabled(true);
+        
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Log.d("onQueryTextSubmit", query);
+                retrieveDetailData(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
 
         final SearchView.SearchAutoComplete autocomplete = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
 
@@ -118,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 Log.d("afterTextChanged", editable.toString());
-                retrieveData(editable.toString());
+                retrieveAutocompleteData(editable.toString());
             }
         });
 
