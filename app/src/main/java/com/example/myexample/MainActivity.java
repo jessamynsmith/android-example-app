@@ -14,7 +14,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
-import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -35,11 +34,8 @@ public class MainActivity extends AppCompatActivity {
     List<String> suggestions = new ArrayList<>();
     JSONArray detailData;
 
-    String authorName;
-    TextView authorNameView;
-
     RecyclerView recyclerView;
-    ArrayList<ListItem> myListData = new ArrayList<ListItem>();
+    ArrayList<ListItem> myListData = new ArrayList<>();
     MyListAdapter recyclerAdapter;
 
     private void retrieveAutocompleteData(String searchParam){
@@ -78,10 +74,10 @@ public class MainActivity extends AppCompatActivity {
                     if (response.length() > 0) {
                         try {
                             JSONObject firstItem = response.getJSONObject(0);
-                            authorName = firstItem.getString("name");
+                            String authorName = firstItem.getString("name");
                             Log.d("authorName", authorName);
-                            authorNameView.setText(authorName);
 
+                            myListData.clear();
                             JSONArray quotations = firstItem.getJSONArray("underquoted");
                             for (int i = 0; i < quotations.length(); i++) {
                                 JSONObject item = quotations.getJSONObject(i);
@@ -105,8 +101,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        authorNameView = findViewById(R.id.authorName);
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
