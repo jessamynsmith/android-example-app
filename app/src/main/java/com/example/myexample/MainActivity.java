@@ -3,6 +3,8 @@ package com.example.myexample;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.view.MenuItemCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.text.Editable;
@@ -35,6 +37,10 @@ public class MainActivity extends AppCompatActivity {
 
     String authorName;
     TextView authorNameView;
+
+    RecyclerView recyclerView;
+    ArrayList<ListItem> myListData = new ArrayList<ListItem>();
+    MyListAdapter recyclerAdapter;
 
     private void retrieveAutocompleteData(String searchParam){
         RequestQueue mRequestQueue = Volley.newRequestQueue(getApplicationContext());
@@ -71,9 +77,21 @@ public class MainActivity extends AppCompatActivity {
                     detailData = response;
                     if (response.length() > 0) {
                         try {
-                            authorName = response.getJSONObject(0).getString("name");
+                            JSONObject firstItem = response.getJSONObject(0);
+                            authorName = firstItem.getString("name");
                             Log.d("authorName", authorName);
                             authorNameView.setText(authorName);
+
+                            JSONArray quotations = firstItem.getJSONArray("underquoted");
+                            for (int i = 0; i < quotations.length(); i++) {
+                                JSONObject item = quotations.getJSONObject(i);
+                                myListData.add(new ListItem((String)item.get("text")));
+                            }
+
+                            ListItem[] arr = new ListItem[myListData.size()];
+                            recyclerAdapter = new MyListAdapter(myListData.toArray(arr));
+
+                            recyclerView.setAdapter(recyclerAdapter);
                         } catch (org.json.JSONException e) {
                             Log.e("JSON exception", e.toString());
                         }
@@ -89,6 +107,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         authorNameView = findViewById(R.id.authorName);
+
+        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     @Override
