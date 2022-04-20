@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.view.MenuItemCompat;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -100,6 +99,12 @@ public class MainActivity extends AppCompatActivity {
         autocomplete.setAdapter(adapter);
         autocomplete.setDropDownBackgroundResource(android.R.color.background_light);
 
+        autocomplete.setOnItemClickListener((parent, view, position, id) -> {
+            Log.d("onItemClick", String.valueOf(position));
+            String queryString = (String)parent.getItemAtPosition(position);
+            autocomplete.setText(queryString);
+        });
+
         autocomplete.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -119,6 +124,5 @@ public class MainActivity extends AppCompatActivity {
 
         return true;
     }
-
 
 }
