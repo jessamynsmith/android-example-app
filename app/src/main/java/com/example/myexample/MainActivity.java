@@ -12,7 +12,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -32,6 +32,9 @@ public class MainActivity extends AppCompatActivity {
 
     List<String> suggestions = new ArrayList<>();
     JSONArray detailData;
+
+    String authorName;
+    TextView authorNameView;
 
     private void retrieveAutocompleteData(String searchParam){
         RequestQueue mRequestQueue = Volley.newRequestQueue(getApplicationContext());
@@ -60,12 +63,21 @@ public class MainActivity extends AppCompatActivity {
     private void retrieveDetailData(String searchParam){
         RequestQueue mRequestQueue = Volley.newRequestQueue(getApplicationContext());
 
-        String authorUrl = "https://underquoted.herokuapp.com/api/v2/authors/";
+        String authorUrl = "https://underquoted.herokuapp.com/api/v2/author_details/";
         String url = authorUrl + "?name=" + searchParam;
         JsonArrayRequest mRequest = new JsonArrayRequest
                 (Request.Method.GET, url, null, response -> {
                     Log.d("response", response.toString());
                     detailData = response;
+                    if (response.length() > 0) {
+                        try {
+                            authorName = response.getJSONObject(0).getString("name");
+                            Log.d("authorName", authorName);
+                            authorNameView.setText(authorName);
+                        } catch (org.json.JSONException e) {
+                            Log.e("JSON exception", e.toString());
+                        }
+                    }
                 }, error -> Log.e("JsonArrayRequest error", error.toString()));
 
         mRequestQueue.add(mRequest);
@@ -76,28 +88,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        AutoCompleteTextView autocomplete = findViewById(R.id.autoComplete);
-        adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_dropdown_item_1line, suggestions);
-        autocomplete.setThreshold(1);
-        autocomplete.setAdapter(adapter);
-
-        autocomplete.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                Log.d("afterTextChanged", editable.toString());
-                retrieveAutocompleteData(editable.toString());
-            }
-        });
+        authorNameView = findViewById(R.id.authorName);
     }
 
     @Override
