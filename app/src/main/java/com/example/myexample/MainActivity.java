@@ -11,59 +11,43 @@ import android.view.MenuInflater;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
-    private RequestQueue mRequestQueue;
-    private JsonArrayRequest mRequest;
-    private String authorUrl = "https://underquoted.herokuapp.com/api/v2/author_summary/";
 
     ArrayAdapter<String> adapter;
 
     List<String> suggestions = new ArrayList<>();
 
     private void retrieveData(String searchParam){
-        mRequestQueue = Volley.newRequestQueue(getApplicationContext());
+        RequestQueue mRequestQueue = Volley.newRequestQueue(getApplicationContext());
 
+        String authorUrl = "https://underquoted.herokuapp.com/api/v2/author_summary/";
         String url = authorUrl + "?name=" + searchParam;
-        mRequest = new JsonArrayRequest
-                (Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        Log.d("response", response.toString());
-                        adapter.clear();
-                        try {
-                            for (int i = 0; i < response.length(); i++) {
-                                JSONObject item = response.getJSONObject(i);
-                                adapter.add((String)item.get("name"));
-                            }
-                        } catch (org.json.JSONException e) {
-                            Log.e("JSON exception", e.toString());
+        JsonArrayRequest mRequest = new JsonArrayRequest
+                (Request.Method.GET, url, null, response -> {
+                    Log.d("response", response.toString());
+                    adapter.clear();
+                    try {
+                        for (int i = 0; i < response.length(); i++) {
+                            JSONObject item = response.getJSONObject(i);
+                            adapter.add((String) item.get("name"));
                         }
-                        adapter.notifyDataSetChanged();
-                        adapter.getFilter().filter(searchParam);
+                    } catch (org.json.JSONException e) {
+                        Log.e("JSON exception", e.toString());
                     }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("JsonArrayRequest error", error.toString());
-
-                    }
-                });
+                    adapter.notifyDataSetChanged();
+                    adapter.getFilter().filter(searchParam);
+                }, error -> Log.e("JsonArrayRequest error", error.toString()));
 
         mRequestQueue.add(mRequest);
     }
@@ -73,8 +57,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        AutoCompleteTextView autocomplete = (AutoCompleteTextView)findViewById(R.id.autoComplete);
-        adapter = new ArrayAdapter<String>(this,
+        AutoCompleteTextView autocomplete = findViewById(R.id.autoComplete);
+        adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_dropdown_item_1line, suggestions);
         autocomplete.setThreshold(1);
         autocomplete.setAdapter(adapter);
